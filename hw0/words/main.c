@@ -46,7 +46,14 @@ WordCount* word_counts = NULL;
  */
 int num_words(FILE* infile) {
   int num_words = 0;
-
+  int c,p='a';
+  bool flag=0;
+  while ((c = fgetc(infile)) != EOF) { // standard C I/O file reading loop
+      flag=1;
+      if(!isalpha(p)&&isalpha(c))num_words++;
+      p=c;
+  }
+  if(flag)num_words++;
   return num_words;
 }
 
@@ -56,13 +63,24 @@ int num_words(FILE* infile) {
  * Given infile, extracts and adds each word in the FILE to `wclist`.
  * Useful functions: fgetc(), isalpha(), tolower(), add_word().
  */
-void count_words(WordCount** wclist, FILE* infile) {}
+void count_words(WordCount** wclist, FILE* infile) {
+  int c,p='a';
+  char s[65];
+  while ((c = fgetc(infile)) != EOF) { // standard C I/O file reading loop
+      flag=1;
+      if(!isalpha(p)&&isalpha(c))num_words++;
+      p=c;
+  }
+}
 
 /*
  * Comparator to sort list by frequency.
  * Useful function: strcmp().
  */
-static bool wordcount_less(const WordCount* wc1, const WordCount* wc2) { return 0; }
+static bool wordcount_less(const WordCount* wc1, const WordCount* wc2) {
+    if(wc1->count!=wc2->count)return wc1->count-wc2->count;
+    else return strcmp(wc1,wc2);
+}
 
 // In trying times, displays a helpful message.
 static int display_help(void) {
@@ -111,7 +129,6 @@ int main(int argc, char* argv[]) {
         return display_help();
     }
   }
-
   if (!count_mode && !freq_mode) {
     printf("Please specify a mode.\n");
     return display_help();
@@ -123,7 +140,12 @@ int main(int argc, char* argv[]) {
   if ((argc - optind) < 1) {
     // No input file specified, instead, read from STDIN instead.
     infile = stdin;
+    printf("stdin\n");
   } else {
+    printf("file input\n");
+    for (i=optind;i<=argc-1;++i)
+    infile = fopen(argv[i], "r");
+    total_words+=num_words(infile);
     // At least one file specified. Useful functions: fopen(), fclose().
     // The first file can be found at argv[optind]. The last file can be
     // found at argv[argc-1].
@@ -132,6 +154,8 @@ int main(int argc, char* argv[]) {
   if (count_mode) {
     printf("The total number of words is: %i\n", total_words);
   } else {
+    stdout=fopen(argv[optind], "r");
+    count_words(&word_counts,stdout);
     wordcount_sort(&word_counts, wordcount_less);
 
     printf("The frequencies of each word are: \n");
